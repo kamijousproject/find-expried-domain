@@ -1,0 +1,58 @@
+============================================================
+DEAD WEBSITE FINDER - SUMMARY REPORT
+============================================================
+Generated at: 2025-12-10 11:36:44
+
+SEARCH PARAMETERS:
+  Keywords: mock
+  City: mock
+  Bounds: N/A
+
+RESULTS OVERVIEW:
+  Total businesses found: 7
+  With website: 6
+  Without website: 1
+  Websites checked: 6
+
+  *** POTENTIAL LEADS: 5 ***
+
+WEBSITE STATUS BREAKDOWN:
+  NO_DNS: 4 (66.7%)
+  CONNECTION_ERROR: 1 (16.7%)
+  OK: 1 (16.7%)
+
+TOP 10 LEADS:
+----------------------------------------
+1. ร้านอาหาร สมชาย
+   Phone: 02-123-4567
+   Website: https://somchai-restaurant.com
+   Status: NO_DNS
+   Rating: 4.5 (156 reviews)
+
+2. คลินิกหมอสุดา
+   Phone: 02-987-6543
+   Website: https://drsuda-clinic.co.th
+   Status: NO_DNS
+   Rating: 4.8 (89 reviews)
+
+3. อู่ซ่อมรถ วิชัย
+   Phone: 081-234-5678
+   Website: https://vichai-garage.com
+   Status: NO_DNS
+   Rating: 4.2 (45 reviews)
+
+4. โรงแรม ริเวอร์ไซด์
+   Phone: 053-456-789
+   Website: https://riverside-hotel-cm.com
+   Status: NO_DNS
+   Rating: 3.9 (234 reviews)
+
+5. ร้านนวดไทย สบาย
+   Phone: 02-555-1234
+   Website: https://sabai-thaimassage.net
+   Status: CONNECTION_ERROR
+   Rating: 4.6 (312 reviews)
+
+============================================================
+END OF REPORT
+============================================================

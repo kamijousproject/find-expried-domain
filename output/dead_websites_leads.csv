@@ -1,0 +1,6 @@
+﻿business_name,phone,website_url,website_status,status_reason,address,rating,user_ratings_total,place_id
+ร้านอาหาร สมชาย,02-123-4567,https://somchai-restaurant.com,NO_DNS,DNS resolution failed: [Errno 11001] getaddrinfo failed,123 ถนนสุขุมวิท กรุงเทพ,4.5,156,mock1
+คลินิกหมอสุดา,02-987-6543,https://drsuda-clinic.co.th,NO_DNS,DNS resolution failed: [Errno 11001] getaddrinfo failed,456 ถนนพระราม 4 กรุงเทพ,4.8,89,mock2
+อู่ซ่อมรถ วิชัย,081-234-5678,https://vichai-garage.com,NO_DNS,DNS resolution failed: [Errno 11001] getaddrinfo failed,789 ซอยลาดพร้าว 15 กรุงเทพ,4.2,45,mock3
+โรงแรม ริเวอร์ไซด์,053-456-789,https://riverside-hotel-cm.com,NO_DNS,DNS resolution failed: [Errno 11001] getaddrinfo failed,111 ถนนช้างคลาน เชียงใหม่,3.9,234,mock4
+ร้านนวดไทย สบาย,02-555-1234,https://sabai-thaimassage.net,CONNECTION_ERROR,Connection error: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1077),222 ถนนสีลม กรุงเทพ,4.6,312,mock5

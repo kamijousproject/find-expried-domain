@@ -1,0 +1,11 @@
+﻿business_name,phone,website_url,website_status,status_reason,address,rating,user_ratings_total,place_id
+ร้านอาหาร สมชาย,02-123-4567,https://somchai-restaurant.com,NO_DNS,DNS resolution failed: NXDOMAIN,123 ถนนสุขุมวิท กรุงเทพ 10110,4.5,156,ChIJ1234567890abcdef
+คลินิกหมอสุดา,02-987-6543,https://drsuda-clinic.co.th,SSL_ERROR,SSL certificate has expired,456 ถนนพระราม 4 กรุงเทพ 10120,4.8,89,ChIJ2345678901bcdefg
+อู่ซ่อมรถ วิชัย,081-234-5678,https://vichai-garage.com,TIMEOUT,Request timed out after 10 seconds,789 ซอยลาดพร้าว 15 กรุงเทพ 10230,4.2,45,ChIJ3456789012cdefgh
+โรงแรม ริเวอร์ไซด์,053-456-789,https://riverside-hotel-chiangmai.com,HTTP_ERROR_5XX,Server error: HTTP 503,111 ถนนช้างคลาน เชียงใหม่ 50100,3.9,234,ChIJ4567890123defghi
+ร้านนวดไทย สบาย,02-555-1234,https://sabai-thaimassage.net,REDIRECT_PARKING,Redirected to parking domain: sedoparking.com,222 ถนนสีลม กรุงเทพ 10500,4.6,312,ChIJ5678901234efghij
+ฟิตเนส 24 ชั่วโมง,02-777-8899,https://fitness24hr.co.th,DEAD_DOMAIN,Domain has expired,333 ถนนรัชดา กรุงเทพ 10400,4.0,178,ChIJ6789012345fghijk
+ร้านกาแฟ บ้านสวน,086-999-0000,https://baansuan-coffee.com,HTTP_ERROR_4XX,Client error: HTTP 404,444 ซอยอารีย์ กรุงเทพ 10400,4.7,567,ChIJ7890123456ghijkl
+ศูนย์เรียนภาษา ABC,02-333-4444,https://abc-language-center.com,CONNECTION_ERROR,Connection refused,555 ถนนเพชรบุรี กรุงเทพ 10400,4.3,123,ChIJ8901234567hijklm
+ร้านขายมือถือ มาบุญครอง,02-111-2222,https://mbk-mobile.com,UNDER_CONSTRUCTION,Website appears to be under construction,444 ถนนพญาไท กรุงเทพ 10330,3.5,89,ChIJ9012345678ijklmn
+คลินิกทันตกรรม ฟันสวย,02-888-9999,https://funsuay-dental.co.th,NO_DNS,DNS resolution failed: name not found,666 ถนนนวมินทร์ กรุงเทพ 10230,4.9,445,ChIJ0123456789jklmno

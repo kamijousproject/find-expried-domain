@@ -1,0 +1,17 @@
+# Dead Website Finder - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# HTTP client for async requests
+httpx>=0.25.0
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# Progress bar (optional, for better UX)
+tqdm>=4.66.0
+
+# DNS resolution (optional, for advanced DNS checks)
+dnspython>=2.4.0
+
+# Type hints support for older Python versions
+typing-extensions>=4.8.0
