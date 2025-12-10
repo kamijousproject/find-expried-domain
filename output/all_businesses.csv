@@ -1,8 +1,0 @@
-﻿place_id,name,formatted_address,formatted_phone_number,website,rating,user_ratings_total,types,business_status,geometry_lat,geometry_lng,keyword_searched,fetched_at,website_status,website_status_reason,website_status_code
-mock1,ร้านอาหาร สมชาย,123 ถนนสุขุมวิท กรุงเทพ,02-123-4567,https://somchai-restaurant.com,4.5,156,,,0.0,0.0,,2025-12-10T11:36:40.871776,NO_DNS,DNS resolution failed: [Errno 11001] getaddrinfo failed,
-mock2,คลินิกหมอสุดา,456 ถนนพระราม 4 กรุงเทพ,02-987-6543,https://drsuda-clinic.co.th,4.8,89,,,0.0,0.0,,2025-12-10T11:36:40.871794,NO_DNS,DNS resolution failed: [Errno 11001] getaddrinfo failed,
-mock3,อู่ซ่อมรถ วิชัย,789 ซอยลาดพร้าว 15 กรุงเทพ,081-234-5678,https://vichai-garage.com,4.2,45,,,0.0,0.0,,2025-12-10T11:36:40.871795,NO_DNS,DNS resolution failed: [Errno 11001] getaddrinfo failed,
-mock4,โรงแรม ริเวอร์ไซด์,111 ถนนช้างคลาน เชียงใหม่,053-456-789,https://riverside-hotel-cm.com,3.9,234,,,0.0,0.0,,2025-12-10T11:36:40.871796,NO_DNS,DNS resolution failed: [Errno 11001] getaddrinfo failed,
-mock5,ร้านนวดไทย สบาย,222 ถนนสีลม กรุงเทพ,02-555-1234,https://sabai-thaimassage.net,4.6,312,,,0.0,0.0,,2025-12-10T11:36:40.871798,CONNECTION_ERROR,Connection error: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1077),
-mock6,ร้านกาแฟ บ้านสวน,444 ซอยอารีย์ กรุงเทพ,086-999-0000,https://google.com,4.7,567,,,0.0,0.0,,2025-12-10T11:36:40.871799,OK,Website is accessible,200
-mock7,ร้านอาหารไม่มีเว็บ,555 ถนนพระราม 9 กรุงเทพ,02-111-2222,,4.0,100,,,0.0,0.0,,2025-12-10T11:36:40.871800,,,

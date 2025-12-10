@@ -28,6 +28,35 @@ logger = logging.getLogger(__name__)
 
 # รายการ domain ที่เป็น parking page / domain registrar
 # เมื่อเว็บ redirect ไปหา domain เหล่านี้ แสดงว่าโดเมนหมดอายุหรือถูก park
+# โดเมนที่ไม่ใช่เว็บไซต์ธุรกิจจริง - ให้ข้ามไป
+SKIP_DOMAINS = {
+    # Social media / Platform domains
+    "google.com",
+    "google.co.th",
+    "facebook.com",
+    "fb.com",
+    "instagram.com",
+    "twitter.com",
+    "x.com",
+    "youtube.com",
+    "tiktok.com",
+    "line.me",
+    "linkedin.com",
+    
+    # E-commerce platforms
+    "shopee.co.th",
+    "lazada.co.th",
+    "grab.com",
+    "foodpanda.co.th",
+    "lineman.line.me",
+    
+    # Booking platforms
+    "booking.com",
+    "agoda.com",
+    "airbnb.com",
+    "tripadvisor.com",
+}
+
 PARKING_PAGE_DOMAINS = {
     # Domain registrars
     "sedoparking.com",
@@ -182,6 +211,24 @@ class WebsiteChecker:
         
         for parking_domain in PARKING_PAGE_DOMAINS:
             if parking_domain in domain:
+                return True
+        
+        return False
+    
+    def should_skip_domain(self, url: str) -> bool:
+        """
+        ตรวจสอบว่าควรข้าม URL นี้หรือไม่ (เช่น Google, Facebook)
+        
+        Args:
+            url: URL to check
+            
+        Returns:
+            True if URL should be skipped
+        """
+        domain = self._extract_domain(url)
+        
+        for skip_domain in SKIP_DOMAINS:
+            if skip_domain in domain:
                 return True
         
         return False

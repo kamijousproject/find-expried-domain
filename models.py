@@ -203,6 +203,88 @@ class Business:
         )
 
 
+# แปลงประเภทธุรกิจจาก Google เป็นภาษาไทย
+BUSINESS_TYPE_THAI = {
+    "restaurant": "ร้านอาหาร",
+    "cafe": "คาเฟ่",
+    "food": "อาหาร",
+    "bakery": "เบเกอรี่",
+    "bar": "บาร์",
+    "night_club": "ไนท์คลับ",
+    "hotel": "โรงแรม",
+    "lodging": "ที่พัก",
+    "resort": "รีสอร์ท",
+    "spa": "สปา",
+    "beauty_salon": "ร้านเสริมสวย",
+    "hair_care": "ร้านทำผม",
+    "gym": "ฟิตเนส",
+    "health": "สุขภาพ",
+    "hospital": "โรงพยาบาล",
+    "doctor": "แพทย์/คลินิก",
+    "dentist": "ทันตแพทย์",
+    "physiotherapist": "กายภาพบำบัด",
+    "veterinary_care": "สัตวแพทย์",
+    "pharmacy": "ร้านขายยา",
+    "car_repair": "อู่ซ่อมรถ",
+    "car_dealer": "ตัวแทนจำหน่ายรถ",
+    "car_wash": "ล้างรถ",
+    "gas_station": "ปั๊มน้ำมัน",
+    "store": "ร้านค้า",
+    "shopping_mall": "ห้างสรรพสินค้า",
+    "supermarket": "ซูเปอร์มาร์เก็ต",
+    "convenience_store": "ร้านสะดวกซื้อ",
+    "clothing_store": "ร้านเสื้อผ้า",
+    "electronics_store": "ร้านอิเล็กทรอนิกส์",
+    "furniture_store": "ร้านเฟอร์นิเจอร์",
+    "home_goods_store": "ร้านของใช้ในบ้าน",
+    "jewelry_store": "ร้านเครื่องประดับ",
+    "pet_store": "ร้านสัตว์เลี้ยง",
+    "florist": "ร้านดอกไม้",
+    "school": "โรงเรียน",
+    "university": "มหาวิทยาลัย",
+    "library": "ห้องสมุด",
+    "bank": "ธนาคาร",
+    "atm": "ตู้ ATM",
+    "insurance_agency": "ประกันภัย",
+    "lawyer": "ทนายความ",
+    "accounting": "บัญชี",
+    "real_estate_agency": "อสังหาริมทรัพย์",
+    "travel_agency": "ท่องเที่ยว",
+    "laundry": "ซักรีด",
+    "moving_company": "ขนส่ง/ขนย้าย",
+    "plumber": "ช่างประปา",
+    "electrician": "ช่างไฟฟ้า",
+    "roofing_contractor": "ช่างหลังคา",
+    "painter": "ช่างทาสี",
+    "general_contractor": "รับเหมาก่อสร้าง",
+    "point_of_interest": "สถานที่น่าสนใจ",
+    "establishment": "สถานประกอบการ",
+}
+
+
+def get_business_category(types: List[str]) -> str:
+    """
+    แปลงประเภทธุรกิจจาก Google เป็นหมวดหมู่ภาษาไทย
+    
+    Args:
+        types: List of Google place types
+        
+    Returns:
+        หมวดหมู่ธุรกิจเป็นภาษาไทย
+    """
+    if not types:
+        return "อื่นๆ"
+    
+    # หาประเภทแรกที่ตรงกับ mapping
+    for t in types:
+        if t in BUSINESS_TYPE_THAI:
+            return BUSINESS_TYPE_THAI[t]
+    
+    # ถ้าไม่เจอ ใช้ประเภทแรก
+    first_type = types[0] if types else "other"
+    return BUSINESS_TYPE_THAI.get(first_type, first_type.replace("_", " ").title())
+
+
 @dataclass
 class Lead:
     """
@@ -219,6 +301,7 @@ class Lead:
     rating: float
     user_ratings_total: int
     place_id: str
+    business_category: str = ""  # หมวดหมู่ธุรกิจ
     
     @classmethod
     def from_business(cls, business: Business) -> "Lead":
@@ -240,12 +323,14 @@ class Lead:
             rating=business.rating,
             user_ratings_total=business.user_ratings_total,
             place_id=business.place_id,
+            business_category=get_business_category(business.types),
         )
     
     def to_dict(self) -> dict:
         """แปลงเป็น dictionary สำหรับ export CSV"""
         return {
             "business_name": self.business_name,
+            "business_category": self.business_category,
             "phone": self.phone,
             "website_url": self.website_url,
             "website_status": self.website_status,

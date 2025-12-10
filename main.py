@@ -6,14 +6,11 @@ CLI application สำหรับค้นหาธุรกิจจาก Goo
 สำหรับใช้เป็น sales leads ในการขายบริการทำเว็บไซต์ให้ SME ไทย
 
 Usage:
-    # ค้นหาด้วย keyword และจังหวัด
-    python main.py --keywords "ร้านอาหาร,คลินิก" --city "Bangkok"
+    # ค้นหาธุรกิจในกรุงเทพ
+    python main.py --province "Bangkok"
     
-    # ค้นหาด้วย bounding box
-    python main.py --keywords "hotel" --bounds "13.5,100.3,13.9,100.9"
-    
-    # ใช้ค่าจาก .env file
-    python main.py
+    # ค้นหาธุรกิจในเชียงใหม่
+    python main.py --province "เชียงใหม่"
     
     # Mock mode สำหรับทดสอบ (ไม่ใช้ API จริง)
     python main.py --mock
@@ -49,51 +46,75 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# รายชื่อจังหวัดที่รองรับ
+SUPPORTED_PROVINCES = [
+    "Bangkok", "กรุงเทพ",
+    "Chiang Mai", "เชียงใหม่",
+    "Chiang Rai", "เชียงราย",
+    "Phuket", "ภูเก็ต",
+    "Khon Kaen", "ขอนแก่น",
+    "Nakhon Ratchasima", "นครราชสีมา",
+    "Udon Thani", "อุดรธานี",
+    "Chonburi", "ชลบุรี",
+    "Pattaya", "พัทยา",
+    "Hat Yai", "หาดใหญ่",
+    "Songkhla", "สงขลา",
+    "Nonthaburi", "นนทบุรี",
+    "Pathum Thani", "ปทุมธานี",
+    "Samut Prakan", "สมุทรปราการ",
+    "Rayong", "ระยอง",
+    "Surat Thani", "สุราษฎร์ธานี",
+]
+
+# Keywords เริ่มต้นสำหรับค้นหาธุรกิจทั่วไป
+DEFAULT_KEYWORDS = [
+    "restaurant", "ร้านอาหาร",
+    "clinic", "คลินิก",
+    "hotel", "โรงแรม",
+    "spa", "สปา",
+    "car repair", "อู่ซ่อมรถ",
+    "gym", "ฟิตเนส",
+    "beauty salon", "ร้านเสริมสวย",
+    "dentist", "ทันตกรรม",
+]
+
+
 def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description="Dead Website Finder - ค้นหาธุรกิจที่มีเว็บไซต์มีปัญหา",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+        epilog=f"""
 Examples:
-  # ค้นหาร้านอาหารในกรุงเทพ
-  python main.py --keywords "ร้านอาหาร" --city "Bangkok"
+  # ค้นหาธุรกิจในกรุงเทพ
+  python main.py --province "Bangkok"
   
-  # ค้นหาหลาย keywords
-  python main.py --keywords "restaurant,hotel,clinic" --city "Chiang Mai"
-  
-  # ใช้ bounding box
-  python main.py --keywords "ร้านอาหาร" --bounds "13.5,100.3,13.9,100.9"
+  # ค้นหาธุรกิจในเชียงใหม่
+  python main.py --province "เชียงใหม่"
   
   # Mode ทดสอบ (mock data)
   python main.py --mock
   
   # เช็กเว็บไซต์เดียว
   python main.py --check-url "https://example.com"
+
+Supported Provinces:
+  {", ".join(SUPPORTED_PROVINCES[::2])}
         """
     )
     
-    # Search options
+    # Search options - เลือกแค่จังหวัด
     parser.add_argument(
-        "--keywords", "-k",
+        "--province", "-p",
         type=str,
-        help="Keywords to search, comma-separated (e.g., 'restaurant,hotel,ร้านอาหาร')"
-    )
-    parser.add_argument(
-        "--city", "-c",
-        type=str,
-        help="City or province name (e.g., 'Bangkok', 'เชียงใหม่', 'Phuket')"
-    )
-    parser.add_argument(
-        "--bounds", "-b",
-        type=str,
-        help="Bounding box as 'south_lat,west_lng,north_lat,east_lng'"
+        required=False,
+        help="Province name (e.g., 'Bangkok', 'เชียงใหม่', 'Phuket')"
     )
     parser.add_argument(
         "--radius", "-r",
         type=int,
-        default=10000,
-        help="Search radius in meters (default: 10000)"
+        default=15000,
+        help="Search radius in meters (default: 15000)"
     )
     
     # Website checker options
@@ -108,30 +129,6 @@ Examples:
         type=int,
         default=10,
         help="Request timeout in seconds (default: 10)"
-    )
-    
-    # Filter options
-    parser.add_argument(
-        "--min-rating",
-        type=float,
-        default=0.0,
-        help="Minimum rating filter (default: 0.0)"
-    )
-    parser.add_argument(
-        "--min-reviews",
-        type=int,
-        default=0,
-        help="Minimum reviews filter (default: 0)"
-    )
-    parser.add_argument(
-        "--require-phone",
-        action="store_true",
-        help="Only include leads with phone number"
-    )
-    parser.add_argument(
-        "--quality-filter",
-        action="store_true",
-        help="Use quality filter (rating >= 3.5, reviews >= 5, require phone)"
     )
     
     # Output options
@@ -223,7 +220,7 @@ async def run_mock_mode(args):
     print("RUNNING IN MOCK MODE (No API calls)")
     print("=" * 60)
     
-    # Create sample businesses
+    # Create sample businesses with types for category
     mock_businesses = [
         Business(
             place_id="mock1",
@@ -233,6 +230,7 @@ async def run_mock_mode(args):
             website="https://somchai-restaurant.com",
             rating=4.5,
             user_ratings_total=156,
+            types=["restaurant", "food"],
         ),
         Business(
             place_id="mock2",
@@ -242,6 +240,7 @@ async def run_mock_mode(args):
             website="https://drsuda-clinic.co.th",
             rating=4.8,
             user_ratings_total=89,
+            types=["doctor", "health"],
         ),
         Business(
             place_id="mock3",
@@ -251,6 +250,7 @@ async def run_mock_mode(args):
             website="https://vichai-garage.com",
             rating=4.2,
             user_ratings_total=45,
+            types=["car_repair"],
         ),
         Business(
             place_id="mock4",
@@ -260,6 +260,7 @@ async def run_mock_mode(args):
             website="https://riverside-hotel-cm.com",
             rating=3.9,
             user_ratings_total=234,
+            types=["hotel", "lodging"],
         ),
         Business(
             place_id="mock5",
@@ -269,15 +270,17 @@ async def run_mock_mode(args):
             website="https://sabai-thaimassage.net",
             rating=4.6,
             user_ratings_total=312,
+            types=["spa", "health"],
         ),
         Business(
             place_id="mock6",
             name="ร้านกาแฟ บ้านสวน",
             formatted_address="444 ซอยอารีย์ กรุงเทพ",
             formatted_phone_number="086-999-0000",
-            website="https://google.com",  # This one will be OK
+            website="https://facebook.com/baansuancafe",  # Platform URL - will be skipped
             rating=4.7,
             user_ratings_total=567,
+            types=["cafe", "restaurant"],
         ),
         Business(
             place_id="mock7",
@@ -287,6 +290,7 @@ async def run_mock_mode(args):
             website="",  # No website
             rating=4.0,
             user_ratings_total=100,
+            types=["restaurant"],
         ),
     ]
     
@@ -299,13 +303,22 @@ async def run_mock_mode(args):
         timeout=args.timeout
     )
     
-    # Get URLs to check
-    urls_to_check = [(b.place_id, b.website) for b in mock_businesses if b.website]
+    # Get URLs to check - กรอง platform URLs ออก
+    urls_to_check = []
+    skipped_count = 0
+    for b in mock_businesses:
+        if b.website:
+            if checker.should_skip_domain(b.website):
+                skipped_count += 1
+            else:
+                urls_to_check.append(b.website)
     
     print(f"Websites to check: {len(urls_to_check)}")
+    if skipped_count > 0:
+        print(f"Skipped {skipped_count} platform URLs (Google, Facebook, etc.)")
     
     # Check websites
-    results = await checker.check_many([url for _, url in urls_to_check])
+    results = await checker.check_many(urls_to_check)
     
     # Map results back to businesses
     url_to_result = {r.url: r for r in results}
@@ -316,38 +329,31 @@ async def run_mock_mode(args):
             if normalized_url in url_to_result:
                 business.website_check_result = url_to_result[normalized_url]
     
-    # Filter leads
-    print("\n--- Filtering Leads ---")
-    if args.quality_filter:
-        lead_filter = create_quality_filter()
-    else:
-        lead_filter = create_default_filter()
-    
+    # Filter leads - เฉพาะเว็บที่มีปัญหา
+    print("\n--- Filtering Dead Website Leads ---")
+    lead_filter = create_default_filter()
     leads = lead_filter.filter_leads(mock_businesses)
     
-    print(f"Leads found: {len(leads)}")
+    print(f"Dead website leads: {len(leads)}")
     
-    # Export
-    print("\n--- Exporting Results ---")
+    # Export - เฉพาะ dead websites
+    print("\n--- Exporting Dead Website Leads ---")
     exporter = Exporter(args.output)
     
-    csv_path = exporter.export_leads_csv(leads, args.output_name)
-    print(f"Leads CSV: {csv_path}")
-    
-    all_csv_path = exporter.export_all_businesses_csv(mock_businesses, "all_businesses.csv")
-    print(f"All businesses CSV: {all_csv_path}")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    csv_path = exporter.export_leads_csv(leads, f"dead_websites_mock_{timestamp}.csv")
+    print(f"Dead Websites CSV: {csv_path}")
     
     # Print summary
     search_info = {
-        "keywords": args.keywords or "mock",
-        "city": args.city or "mock",
+        "province": "mock",
         "mode": "mock"
     }
     report = exporter.generate_summary_report(mock_businesses, leads, search_info)
     print(report)
     
     # Save summary
-    summary_path = exporter.save_summary_report(mock_businesses, leads, "summary_report.txt", search_info)
+    summary_path = exporter.save_summary_report(mock_businesses, leads, f"summary_mock_{timestamp}.txt", search_info)
     print(f"\nSummary saved to: {summary_path}")
 
 
@@ -367,11 +373,9 @@ async def run_full_pipeline(args):
     
     # Load configuration
     try:
-        keywords = args.keywords.split(",") if args.keywords else None
         config = load_config(
-            keywords=keywords,
-            bounds=args.bounds,
-            city=args.city,
+            keywords=DEFAULT_KEYWORDS,
+            city=args.province,
             concurrent=args.concurrent,
             timeout=args.timeout,
             output_dir=args.output,
@@ -394,10 +398,8 @@ async def run_full_pipeline(args):
     
     # Search businesses (unless skip-search or export-only)
     if not args.skip_search and not args.export_only:
-        print(f"\n--- Searching Businesses ---")
-        print(f"Keywords: {config.keywords}")
-        print(f"City: {config.city or 'N/A'}")
-        print(f"Bounds: {config.search_bounds or 'N/A'}")
+        print(f"\n--- Searching Businesses in {args.province or config.city or 'Thailand'} ---")
+        print(f"Keywords: {", ".join(DEFAULT_KEYWORDS[:4])}... ({len(DEFAULT_KEYWORDS)} total)")
         
         async with GoogleMapsClient(config) as client:
             total_found = 0
@@ -438,7 +440,18 @@ async def run_full_pipeline(args):
                 timeout=config.request_timeout
             )
             
-            urls_to_check = [b.website for b in businesses_to_check]
+            # กรองโดเมนที่ไม่ใช่เว็บธุรกิจจริง (Google, Facebook, etc.)
+            urls_to_check = []
+            skipped_count = 0
+            for b in businesses_to_check:
+                if checker.should_skip_domain(b.website):
+                    skipped_count += 1
+                else:
+                    urls_to_check.append(b.website)
+            
+            if skipped_count > 0:
+                print(f"Skipped {skipped_count} platform URLs (Google, Facebook, etc.)")
+            
             results = await checker.check_many(urls_to_check)
             
             # Map results back and update database
@@ -461,40 +474,27 @@ async def run_full_pipeline(args):
     # Get all businesses from database for filtering
     all_businesses = list(db.get_all_businesses())
     
-    # Filter leads
-    print("\n--- Filtering Leads ---")
-    if args.quality_filter:
-        lead_filter = create_quality_filter()
-        print("Using quality filter")
-    else:
-        lead_filter = create_default_filter()
-        print("Using default filter")
-    
+    # Filter leads - เอาเฉพาะเว็บที่มีปัญหา
+    print("\n--- Filtering Leads (เว็บที่มีปัญหา) ---")
+    lead_filter = create_default_filter()
     leads = lead_filter.filter_leads(all_businesses)
-    print(f"Leads found: {len(leads)}")
+    print(f"Dead website leads: {len(leads)}")
     
-    # Export results
-    print("\n--- Exporting Results ---")
+    # Export results - เฉพาะ dead websites
+    print("\n--- Exporting Dead Website Leads ---")
     
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    province_name = (args.province or config.city or "all").replace(" ", "_")
     
-    # Main leads CSV
-    csv_path = exporter.export_leads_csv(leads, config.output_filename)
-    print(f"Leads CSV: {csv_path}")
-    
-    # All businesses CSV
-    all_csv = exporter.export_all_businesses_csv(all_businesses, f"all_businesses_{timestamp}.csv")
-    print(f"All businesses CSV: {all_csv}")
-    
-    # JSON exports
-    json_path = exporter.export_leads_json(leads, f"leads_{timestamp}.json")
-    print(f"Leads JSON: {json_path}")
+    # Main leads CSV - เฉพาะ dead websites
+    output_filename = f"dead_websites_{province_name}_{timestamp}.csv"
+    csv_path = exporter.export_leads_csv(leads, output_filename)
+    print(f"Dead Websites CSV: {csv_path}")
     
     # Summary report
     search_info = {
-        "keywords": ",".join(config.keywords),
-        "city": config.city or "N/A",
-        "bounds": str(config.search_bounds) if config.search_bounds else "N/A",
+        "province": args.province or config.city or "N/A",
+        "keywords": "(ค้นหาทั่วไป)",
     }
     
     report = exporter.generate_summary_report(all_businesses, leads, search_info)

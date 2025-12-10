@@ -78,6 +78,7 @@ class Exporter:
         # CSV column headers with descriptions
         headers = [
             "business_name",
+            "business_category",
             "phone",
             "website_url",
             "website_status",
