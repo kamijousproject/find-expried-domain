@@ -15,3 +15,6 @@ dnspython>=2.4.0
 
 # Type hints support for older Python versions
 typing-extensions>=4.8.0
+
+# Data analysis for filtering CSV files
+pandas>=2.0.0
