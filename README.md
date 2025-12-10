@@ -5,10 +5,11 @@
 ## Features
 
 - ✅ ค้นหาธุรกิจจาก Google Places API อย่างถูกต้องตาม Terms of Service
-- ✅ รองรับการค้นหาด้วย keyword ทั้งภาษาไทยและอังกฤษ
+- ✅ **เลือกจังหวัดง่ายๆ** - รองรับจังหวัดหลักในไทย
 - ✅ ตรวจสอบเว็บไซต์แบบ async (100+ concurrent connections)
 - ✅ ตรวจจับหลายสถานะ: DNS หาย, SSL error, Timeout, HTTP error, Parking pages
-- ✅ Export เป็น CSV พร้อมใช้งานสำหรับ sales team
+- ✅ **กรอง Platform URLs ออกอัตโนมัติ** (Google, Facebook, Instagram, Shopee, etc.)
+- ✅ Export เป็น CSV **เฉพาะเว็บที่มีปัญหา** พร้อมหมวดหมู่ธุรกิจ
 - ✅ เก็บข้อมูลใน SQLite สำหรับ resume การทำงาน
 - ✅ CLI interface ใช้งานง่าย
 
@@ -76,31 +77,28 @@ cp .env.example .env
 ### Basic Usage
 
 ```bash
-# ค้นหาร้านอาหารในกรุงเทพ
-python main.py --keywords "ร้านอาหาร" --city "Bangkok"
+# ค้นหาธุรกิจในกรุงเทพ
+python main.py --province "Bangkok"
 
-# ค้นหาหลาย keywords
-python main.py --keywords "restaurant,hotel,clinic" --city "Chiang Mai"
+# ค้นหาธุรกิจในเชียงใหม่
+python main.py --province "Chiang Mai"
 
 # ค้นหาด้วยชื่อจังหวัดภาษาไทย
-python main.py --keywords "คลินิก,ร้านสปา" --city "เชียงใหม่"
+python main.py --province "เชียงใหม่"
 ```
 
-### Advanced Usage
+### Supported Provinces
 
-```bash
-# ใช้ bounding box กำหนดพื้นที่ค้นหา
-python main.py --keywords "ร้านอาหาร" --bounds "13.5,100.3,13.9,100.9"
-
-# กำหนดจำนวน concurrent connections
-python main.py --keywords "hotel" --city "Phuket" --concurrent 200
-
-# ใช้ quality filter (rating >= 3.5, reviews >= 5, ต้องมีเบอร์โทร)
-python main.py --keywords "restaurant" --city "Bangkok" --quality-filter
-
-# กำหนด minimum rating
-python main.py --keywords "clinic" --city "Bangkok" --min-rating 4.0 --min-reviews 10
-```
+- Bangkok / กรุงเทพ
+- Chiang Mai / เชียงใหม่
+- Chiang Rai / เชียงราย
+- Phuket / ภูเก็ต
+- Khon Kaen / ขอนแก่น
+- Nakhon Ratchasima / นครราชสีมา
+- Chonburi / ชลบุรี
+- Pattaya / พัทยา
+- Hat Yai / หาดใหญ่
+- Surat Thani / สุราษฎร์ธานี
 
 ### Special Modes
 
@@ -114,9 +112,6 @@ python main.py --check-url "https://example.com"
 # Resume จากการรันครั้งก่อน
 python main.py --resume
 
-# ข้าม search phase, เช็กเฉพาะเว็บใน database
-python main.py --skip-search
-
 # Export เฉพาะข้อมูลที่มีใน database
 python main.py --export-only
 ```
@@ -128,49 +123,31 @@ python main.py --help
 ```
 
 ```
-usage: main.py [-h] [--keywords KEYWORDS] [--city CITY] [--bounds BOUNDS]
-               [--radius RADIUS] [--concurrent CONCURRENT] [--timeout TIMEOUT]
-               [--min-rating MIN_RATING] [--min-reviews MIN_REVIEWS]
-               [--require-phone] [--quality-filter] [--output OUTPUT]
-               [--output-name OUTPUT_NAME] [--mock] [--check-url CHECK_URL]
-               [--resume] [--skip-search] [--export-only] [--verbose] [--debug]
-
-Dead Website Finder - ค้นหาธุรกิจที่มีเว็บไซต์มีปัญหา
-
 options:
   -h, --help            show this help message and exit
-  --keywords, -k        Keywords to search, comma-separated
-  --city, -c            City or province name
-  --bounds, -b          Bounding box as 'south_lat,west_lng,north_lat,east_lng'
-  --radius, -r          Search radius in meters (default: 10000)
+  --province, -p        Province name (e.g., 'Bangkok', 'เชียงใหม่')
+  --radius, -r          Search radius in meters (default: 15000)
   --concurrent, -n      Number of concurrent connections (default: 100)
   --timeout, -t         Request timeout in seconds (default: 10)
-  --min-rating          Minimum rating filter (default: 0.0)
-  --min-reviews         Minimum reviews filter (default: 0)
-  --require-phone       Only include leads with phone number
-  --quality-filter      Use quality filter
   --output, -o          Output directory (default: ./output)
-  --output-name         Output CSV filename
   --mock                Run in mock mode with sample data
   --check-url           Check a single URL and exit
   --resume              Resume from previous run
-  --skip-search         Skip search phase
   --export-only         Only export data from existing database
-  --verbose, -v         Enable verbose output
-  --debug               Enable debug mode
 ```
 
 ## Output Files
 
 หลังจากรันโปรแกรม จะได้ไฟล์ใน folder `./output/`:
 
-### 1. `dead_websites_leads.csv` (Main Output)
+### 1. `dead_websites_[PROVINCE]_[TIMESTAMP].csv` (Main Output)
 
-ไฟล์หลักสำหรับ sales team ประกอบด้วย:
+ไฟล์หลักสำหรับ sales team - **เฉพาะเว็บที่มีปัญหา**:
 
 | Column | Description |
 |--------|-------------|
 | `business_name` | ชื่อธุรกิจ |
+| `business_category` | **หมวดหมู่ธุรกิจ** (ร้านอาหาร, คลินิก, โรงแรม, etc.) |
 | `phone` | เบอร์โทรศัพท์ |
 | `website_url` | URL เว็บไซต์ |
 | `website_status` | สถานะเว็บ (NO_DNS, TIMEOUT, etc.) |
@@ -180,17 +157,17 @@ options:
 | `user_ratings_total` | จำนวนรีวิว |
 | `place_id` | Google Place ID |
 
-### 2. `all_businesses_TIMESTAMP.csv`
-
-ข้อมูลธุรกิจทั้งหมดที่พบ (รวมเว็บที่ใช้งานได้)
-
-### 3. `leads_TIMESTAMP.json`
-
-ข้อมูล leads ในรูปแบบ JSON
-
-### 4. `summary_TIMESTAMP.txt`
+### 2. `summary_[TIMESTAMP].txt`
 
 รายงานสรุปผลการค้นหา
+
+## Filtered Platform URLs
+
+ระบบจะกรอง URLs ของ platform เหล่านี้ออกอัตโนมัติ (ไม่ใช่เว็บธุรกิจจริง):
+
+- **Social Media**: Google, Facebook, Instagram, YouTube, TikTok, LINE, Twitter/X
+- **E-commerce**: Shopee, Lazada, Grab, Foodpanda
+- **Booking**: Booking.com, Agoda, Airbnb, TripAdvisor
 
 ## Website Status Codes
 
@@ -231,20 +208,15 @@ find-expired-domain/
 
 ## Example Output
 
-### Sample CSV (10 rows)
+### Sample CSV
 
 ```csv
-business_name,phone,website_url,website_status,status_reason,address,rating,user_ratings_total,place_id
-ร้านอาหาร สมชาย,02-123-4567,https://somchai-restaurant.com,NO_DNS,"DNS resolution failed: NXDOMAIN","123 ถนนสุขุมวิท กรุงเทพ 10110",4.5,156,ChIJ1234567890abcdef
-คลินิกหมอสุดา,02-987-6543,https://drsuda-clinic.co.th,SSL_ERROR,"SSL certificate has expired","456 ถนนพระราม 4 กรุงเทพ 10120",4.8,89,ChIJ2345678901bcdefg
-อู่ซ่อมรถ วิชัย,081-234-5678,https://vichai-garage.com,TIMEOUT,"Request timed out after 10 seconds","789 ซอยลาดพร้าว 15 กรุงเทพ 10230",4.2,45,ChIJ3456789012cdefgh
-โรงแรม ริเวอร์ไซด์,053-456-789,https://riverside-hotel-chiangmai.com,HTTP_ERROR_5XX,"Server error: HTTP 503","111 ถนนช้างคลาน เชียงใหม่ 50100",3.9,234,ChIJ4567890123defghi
-ร้านนวดไทย สบาย,02-555-1234,https://sabai-thaimassage.net,REDIRECT_PARKING,"Redirected to parking domain: sedoparking.com","222 ถนนสีลม กรุงเทพ 10500",4.6,312,ChIJ5678901234efghij
-ฟิตเนส 24 ชั่วโมง,02-777-8899,https://fitness24hr.co.th,DEAD_DOMAIN,"Domain has expired","333 ถนนรัชดา กรุงเทพ 10400",4.0,178,ChIJ6789012345fghijk
-ร้านกาแฟ บ้านสวน,086-999-0000,https://baansuan-coffee.com,HTTP_ERROR_4XX,"Client error: HTTP 404","444 ซอยอารีย์ กรุงเทพ 10400",4.7,567,ChIJ7890123456ghijkl
-ศูนย์เรียนภาษา ABC,02-333-4444,https://abc-language-center.com,CONNECTION_ERROR,"Connection refused","555 ถนนเพชรบุรี กรุงเทพ 10400",4.3,123,ChIJ8901234567hijklm
-ร้านขายมือถือ มาบุญครอง,02-111-2222,https://mbk-mobile.com,UNDER_CONSTRUCTION,"Website appears to be under construction","444 ถนนพญาไท กรุงเทพ 10330",3.5,89,ChIJ9012345678ijklmn
-คลินิกทันตกรรม ฟันสวย,02-888-9999,https://funsuay-dental.co.th,NO_DNS,"DNS resolution failed: name not found","666 ถนนนวมินทร์ กรุงเทพ 10230",4.9,445,ChIJ0123456789jklmno
+business_name,business_category,phone,website_url,website_status,status_reason,address,rating,user_ratings_total,place_id
+ร้านอาหาร สมชาย,ร้านอาหาร,02-123-4567,https://somchai-restaurant.com,NO_DNS,"DNS resolution failed","123 ถนนสุขุมวิท กรุงเทพ",4.5,156,mock1
+คลินิกหมอสุดา,แพทย์/คลินิก,02-987-6543,https://drsuda-clinic.co.th,NO_DNS,"DNS resolution failed","456 ถนนพระราม 4 กรุงเทพ",4.8,89,mock2
+อู่ซ่อมรถ วิชัย,อู่ซ่อมรถ,081-234-5678,https://vichai-garage.com,NO_DNS,"DNS resolution failed","789 ซอยลาดพร้าว 15 กรุงเทพ",4.2,45,mock3
+โรงแรม ริเวอร์ไซด์,โรงแรม,053-456-789,https://riverside-hotel-cm.com,NO_DNS,"DNS resolution failed","111 ถนนช้างคลาน เชียงใหม่",3.9,234,mock4
+ร้านนวดไทย สบาย,สปา,02-555-1234,https://sabai-thaimassage.net,CONNECTION_ERROR,"SSL error","222 ถนนสีลม กรุงเทพ",4.6,312,mock5
 ```
 
 ### Column Descriptions
@@ -252,6 +224,7 @@ business_name,phone,website_url,website_status,status_reason,address,rating,user
 | Column | Description | Usage |
 |--------|-------------|-------|
 | `business_name` | ชื่อธุรกิจจาก Google Maps | ใช้อ้างอิงเวลาโทรหาลูกค้า |
+| `business_category` | **หมวดหมู่ธุรกิจ** | ใช้แบ่งกลุ่มลูกค้าและเตรียม pitch |
 | `phone` | เบอร์โทรติดต่อ | ใช้โทรขายงาน |
 | `website_url` | URL เว็บไซต์เดิม | อ้างอิงปัญหาเดิมของลูกค้า |
 | `website_status` | รหัสสถานะ | ใช้จัดลำดับความสำคัญ (NO_DNS > TIMEOUT > others) |
@@ -261,12 +234,24 @@ business_name,phone,website_url,website_status,status_reason,address,rating,user
 | `user_ratings_total` | จำนวนรีวิว | ธุรกิจที่มี reviews มากน่าจะมีลูกค้าประจำ |
 | `place_id` | Google Place ID | สำหรับ reference หรือ lookup เพิ่มเติม |
 
+### Business Categories (หมวดหมู่ธุรกิจ)
+
+ระบบแปลงประเภทจาก Google เป็นภาษาไทยอัตโนมัติ:
+
+- ร้านอาหาร, คาเฟ่, เบเกอรี่, บาร์
+- โรงแรม, ที่พัก, รีสอร์ท
+- คลินิก/แพทย์, ทันตแพทย์, โรงพยาบาล, ร้านขายยา
+- สปา, ร้านเสริมสวย, ร้านทำผม, ฟิตเนส
+- อู่ซ่อมรถ, ล้างรถ, ปั๊มน้ำมัน
+- ร้านค้า, ร้านเสื้อผ้า, ร้านอิเล็กทรอนิกส์
+
 ## Tips for Sales Team
 
 1. **เริ่มจาก NO_DNS และ DEAD_DOMAIN** - โดเมนหมดอายุแน่นอน ลูกค้าต้องการเว็บใหม่
-2. **เน้นธุรกิจที่มี rating 4.0+ และ reviews 50+** - ยังเปิดกิจการและมีลูกค้าประจำ
-3. **โทรหาเบอร์โทรจาก Google Maps โดยตรง** - เป็นเบอร์ที่ธุรกิจใส่เอง น่าจะรับสาย
-4. **เตรียม pitch ว่าเราเจอว่าเว็บมีปัญหา** - ใช้ข้อมูลจาก `status_reason` อธิบาย
+2. **แบ่งตามหมวดหมู่ธุรกิจ** - ใช้ `business_category` เพื่อเตรียม pitch ที่เหมาะสม
+3. **เน้นธุรกิจที่มี rating 4.0+ และ reviews 50+** - ยังเปิดกิจการและมีลูกค้าประจำ
+4. **โทรหาเบอร์โทรจาก Google Maps โดยตรง** - เป็นเบอร์ที่ธุรกิจใส่เอง น่าจะรับสาย
+5. **เตรียม pitch ว่าเราเจอว่าเว็บมีปัญหา** - ใช้ข้อมูลจาก `status_reason` อธิบาย
 
 ## API Costs
 
